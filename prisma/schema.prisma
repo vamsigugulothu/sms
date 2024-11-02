@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:edgegrid@127.0.0.1:5432/sms" //env("DATABASE_URL")
+}
+
+enum role {
+  student
+  teacher
+  admin
+}
+
+enum subject {
+  english
+  science
+  maths
+  unknown
+}
+
+model user {
+  id    Int     @id @default(autoincrement())
+  name  String? @db.VarChar(200)
+  email String  @unique @db.VarChar(200)
+  role  role    @default(student)
+
+  created_at DateTime @default(now())
+
+  student_link Int? @unique
+  teacher_link Int? @unique
+
+  student student? @relation(fields: [student_link], references: [id])
+  teacher teacher? @relation(fields: [teacher_link], references: [id])
+}
+
+model student {
+  id              Int      @id @default(autoincrement())
+  name            String?  @db.VarChar(200)
+  age             Int?
+  enrollment_date DateTime @default(now())
+  user            user[]
+}
+
+model teacher {
+  id      Int     @id @default(autoincrement())
+  name    String? @db.VarChar(200)
+  age     Int?
+  subject subject @default(unknown)
+  user    user?
+}
+
+model classroom {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+}
