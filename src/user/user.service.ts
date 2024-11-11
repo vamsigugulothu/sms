@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { UserRepo } from 'src/dbaccess/user.repo';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private userRepo: UserRepo,
+  ) {}
 
   async addNewUser(req: any, res: any) {
     console.log('check', req.body);
@@ -14,9 +18,7 @@ export class UserService {
         .send({ status_code: 400, message: 'role and email are required' });
     }
 
-    const isUserExists = await this.prisma.user.findFirst({
-      where: { email: email },
-    });
+    const isUserExists = await this.userRepo.findUserByEmail(email);
 
     if (isUserExists) {
       return res
